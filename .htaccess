@@ -1,0 +1,78 @@
+# ######################################################################
+# # REWRITES                                                           #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Rewrite engine                                                     |
+# ----------------------------------------------------------------------
+
+
+<IfModule mod_rewrite.c>
+
+    # (1)
+    RewriteEngine On
+
+    # (2)
+    Options +FollowSymlinks
+
+    # (3)
+    # Options +SymLinksIfOwnerMatch
+
+    # (4)
+	RewriteBase /
+
+    # (5)
+    # RewriteOptions <options>
+
+    # (6)
+    #RewriteCond %{HTTPS} =on
+    #RewriteRule ^ - [env=proto:https]
+    #RewriteCond %{HTTPS} !=on
+    #RewriteRule ^ - [env=proto:http]
+
+    # ----------------------------------------------------------------------
+    # Force HTTPS on Live Site
+    # ----------------------------------------------------------------------
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+	# Remove Extensions
+	# order deny,allow
+
+
+	# ----------------------------------------------------------------------
+	# | Rewrite Rules for Our Dev Sites
+	# ----------------------------------------------------------------------
+	RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+	# ----------------------------------------------------------------------
+	# | Remove Extension from html files
+	# ----------------------------------------------------------------------
+	RewriteRule ^([^\.]+)$ $1.html [NC,L]
+
+</IfModule>
+
+# ----------------------------------------------------------------------
+# | Forcing `https://`                                                 |
+# ----------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Option 1: rewrite www.example.com → example.com
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ %{ENV:PROTO}://%1%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+
+AddType text/html .shtml
+AddHandler server-parsed .html
+AddHandler server-parsed .shtml
+AddHandler server-parsed .cshtml
+AddHandler server-parsed .htm
+AddHandler server-parsed .ssi
+Options Indexes FollowSymLinks Includes
